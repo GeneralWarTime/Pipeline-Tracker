@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .add-job-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .add-job-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .jobs-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .table-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .table-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-closed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .edit-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .currency {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .commission {
+            font-weight: 600;
+            color: #007bff;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Pipeline</h1>
+            <p>Track your recruitment pipeline, deal sizes, and commission earnings</p>
+        </div>
+
+        <div class="nav" style="display: flex; justify-content: center; margin-bottom: 30px;">
+            <a href="/" class="nav-btn" style="background: #667eea; color: white; border: 2px solid #667eea; padding: 12px 25px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin: 0 10px; transition: all 0.2s ease; text-decoration: none;">📊 Dashboard</a>
+            <a href="/contractors" class="nav-btn" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 12px 25px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin: 0 10px; transition: all 0.2s ease; text-decoration: none;">👥 Contractors</a>
+            <a href="/money-lost" class="nav-btn" style="background: white; color: #667eea; border: 2px solid #667eea; padding: 12px 25px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin: 0 10px; transition: all 0.2s ease; text-decoration: none;">💸 Money Lost</a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="totalJobs">0</h3>
+                <p>Total Jobs</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="activeJobs">0</h3>
+                <p>Active Jobs</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="pendingJobs">0</h3>
+                <p>Pending Jobs</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="jobDealSize" class="currency">$0</h3>
+                <p>Projected Deal Size</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="jobCommission" class="commission">$0</h3>
+                <p>Projected Commission</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="yearlyCommission" class="commission">$0</h3>
+                <p>Yearly Commission (9%)</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="monthlyCommission" class="commission">$0</h3>
+                <p>Monthly Commission (÷12)</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="add-job-btn" onclick="openModal()">➕ Add New Job</button>
+            <div class="filter-controls">
+                <select class="filter-select" id="statusFilter" onchange="filterJobs()">
+                    <option value="">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="jobs-table">
+            <div class="table-header">
+                <h2>📋 Job Pipeline</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Client</th>
+                            <th>Hiring Manager</th>
+                            <th>Start Date</th>
+                            <th>Deal Size</th>
+                            <th>Commission (9%)</th>
+                                                <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                    </thead>
+                    <tbody id="jobsTableBody">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px; color: #666;">
+                                No jobs found. Add your first job to get started!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Job Modal -->
+    <div id="jobModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Job</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="jobForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jobTitle">Job Title *</label>
+                        <input type="text" id="jobTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientName">Client Name *</label>
+                        <select id="clientName" required onchange="updateSupplierMargin()">
+                            <option value="">Select a client</option>
+                            <option value="Commonwealth Bank">Commonwealth Bank</option>
+                            <option value="Mercer">Mercer</option>
+                            <option value="Westpac">Westpac</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hiringManager">Hiring Manager *</label>
+                        <input type="text" id="hiringManager" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startMonth">Starting Month *</label>
+                        <select id="startMonth" name="startMonth" required>
+                            <option value="">Select a month</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dailyRate">Daily Rate ($) *</label>
+                        <input type="number" id="dailyRate" name="dailyRate" step="0.01" placeholder="Enter daily rate" onchange="calculateDealSize()" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="supplierMargin">Supplier Margin (%) *</label>
+                        <input type="number" id="supplierMargin" name="supplierMargin" step="0.01" placeholder="Enter margin %" onchange="calculateDealSize()" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dealSize">Deal Size ($) *</label>
+                        <input type="number" id="dealSize" name="dealSize" step="0.01" required readonly>
+                        <small style="color: #666; font-size: 0.8rem;">Auto-calculated: Daily Rate × 230 × Supplier Margin</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="commissionRate">Commission Rate (%)</label>
+                        <input type="number" id="commissionRate" step="0.01" value="9" min="0" max="100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="Active">Active</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Placed">Placed</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="contractorNameGroup" style="display: none;">
+                    <label for="contractorName">Contractor Name *</label>
+                    <input type="text" id="contractorName" placeholder="Enter the contractor's name">
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Add any additional notes..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let jobs = [];
+        let editingJobId = null;
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadJobs();
+            loadStats();
+            setDefaultMonth();
+        });
+
+        function setDefaultMonth() {
+            const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+            document.getElementById('startMonth').value = currentMonth;
+        }
+
+        function calculateDealSize() {
+            const dailyRate = parseFloat(document.getElementById('dailyRate').value) || 0;
+            const supplierMargin = parseFloat(document.getElementById('supplierMargin').value) || 0;
+            const baseAmount = dailyRate * 230;
+            const dealSize = baseAmount * (supplierMargin / 100);
+            document.getElementById('dealSize').value = dealSize.toFixed(2);
+        }
+
+        function updateSupplierMargin() {
+            const clientName = document.getElementById('clientName').value;
+            const supplierMarginField = document.getElementById('supplierMargin');
+            
+            switch(clientName) {
+                case 'Commonwealth Bank':
+                    supplierMarginField.value = '8';
+                    break;
+                case 'Westpac':
+                    // Average of 11.5% for first 115 days and 9.05% for second 115 days
+                    const averageMargin = ((11.5 + 9.05) / 2).toFixed(2);
+                    supplierMarginField.value = averageMargin;
+                    break;
+                case 'Mercer':
+                    supplierMarginField.value = '';
+                    break;
+                default:
+                    supplierMarginField.value = '';
+            }
+            
+            // Recalculate deal size if daily rate is already entered
+            if (document.getElementById('dailyRate').value) {
+                calculateDealSize();
+            }
+        }
+
+        async function loadJobs() {
+            try {
+                const response = await fetch('/api/jobs');
+                jobs = await response.json();
+                renderJobs();
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                updateStats(stats);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalJobs').textContent = stats.total_jobs;
+            document.getElementById('activeJobs').textContent = stats.active_jobs;
+            document.getElementById('pendingJobs').textContent = stats.pending_jobs;
+            document.getElementById('jobDealSize').textContent = formatCurrency(stats.job_deal_size);
+            document.getElementById('jobCommission').textContent = formatCurrency(stats.job_commission);
+            document.getElementById('yearlyCommission').textContent = formatCurrency(stats.yearly_commission);
+            document.getElementById('monthlyCommission').textContent = formatCurrency(stats.monthly_commission);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
+        }
+
+        function renderJobs() {
+            const tbody = document.getElementById('jobsTableBody');
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            // By default, exclude closed jobs from the main pipeline view
+            let filteredJobs = jobs.filter(job => job.status !== 'Closed');
+            
+            if (statusFilter) {
+                if (statusFilter === 'Closed') {
+                    // If user specifically wants to see closed jobs, show them
+                    filteredJobs = jobs.filter(job => job.status === 'Closed');
+                } else {
+                    // For other filters, exclude closed jobs
+                    filteredJobs = jobs.filter(job => job.status === statusFilter && job.status !== 'Closed');
+                }
+            }
+
+            if (filteredJobs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #666;">
+                            No jobs found matching the current filter.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredJobs.map(job => `
+                <tr>
+                    <td><strong>${job.job_title}</strong></td>
+                    <td>${job.client_name}</td>
+                    <td>${job.hiring_manager}</td>
+                    <td>${formatDate(job.start_date)}</td>
+                    <td class="currency">${formatCurrency(job.deal_size)}</td>
+                    <td class="commission">${formatCurrency(job.commission_amount)}</td>
+                    <td><span class="status-badge status-${job.status.toLowerCase()}">${job.status}</span></td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editJob(${job.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteJob(${job.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            // If it's already a month name, return it as is
+            if (typeof dateString === 'string' && dateString.length > 0) {
+                return dateString;
+            }
+            // Fallback for any date objects
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function filterJobs() {
+            renderJobs();
+        }
+
+        function openModal(jobId = null) {
+            editingJobId = jobId;
+            const modal = document.getElementById('jobModal');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (jobId) {
+                modalTitle.textContent = 'Edit Job';
+                const job = jobs.find(j => j.id === jobId);
+                if (job) {
+                    document.getElementById('jobTitle').value = job.job_title;
+                    document.getElementById('clientName').value = job.client_name;
+                    document.getElementById('hiringManager').value = job.hiring_manager;
+                    document.getElementById('startMonth').value = job.start_date;
+                    // For editing, we'll need to estimate the values since we don't store them
+                    // We'll set default values and let user adjust
+                    document.getElementById('dailyRate').value = '';
+                    document.getElementById('supplierMargin').value = '';
+                    document.getElementById('dealSize').value = job.deal_size;
+                    document.getElementById('commissionRate').value = (job.commission_rate * 100).toFixed(2);
+                    document.getElementById('status').value = job.status;
+
+                    document.getElementById('notes').value = job.notes || '';
+                    
+                    // Update supplier margin based on client if it's one of our predefined clients
+                    updateSupplierMargin();
+                    
+
+                }
+            } else {
+                modalTitle.textContent = 'Add New Job';
+                document.getElementById('jobForm').reset();
+                setDefaultMonth();
+                // Clear deal size when adding new job
+                document.getElementById('dealSize').value = '';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('jobModal').style.display = 'none';
+            editingJobId = null;
+        }
+
+
+
+        // Show/hide contractor name field based on status
+        document.getElementById('status').addEventListener('change', function() {
+            const contractorNameGroup = document.getElementById('contractorNameGroup');
+            const contractorNameInput = document.getElementById('contractorName');
+            
+            if (this.value === 'Placed') {
+                contractorNameGroup.style.display = 'block';
+                contractorNameInput.required = true;
+            } else {
+                contractorNameGroup.style.display = 'none';
+                contractorNameInput.required = false;
+            }
+        });
+
+        document.getElementById('jobForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            console.log('Form submission started');
+            
+            const formData = {
+                job_title: document.getElementById('jobTitle').value,
+                client_name: document.getElementById('clientName').value,
+                hiring_manager: document.getElementById('hiringManager').value,
+                start_date: document.getElementById('startMonth').value,
+                deal_size: document.getElementById('dealSize').value,
+                commission_rate: parseFloat(document.getElementById('commissionRate').value) / 100,
+                status: document.getElementById('status').value,
+
+                contractor_name: document.getElementById('contractorName').value,
+                notes: document.getElementById('notes').value
+            };
+
+            console.log('Form data:', formData);
+
+            try {
+                const url = editingJobId ? `/api/jobs/${editingJobId}` : '/api/jobs';
+                const method = editingJobId ? 'PUT' : 'POST';
+                
+                console.log('Sending request to:', url, 'with method:', method);
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                console.log('Response status:', response.status);
+                const result = await response.json();
+                console.log('Response result:', result);
+                
+                if (result.success) {
+                    closeModal();
+                    loadJobs();
+                    loadStats();
+                    alert(editingJobId ? 'Job updated successfully!' : 'Job added successfully!');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error saving job:', error);
+                alert('Error saving job. Please try again.');
+            }
+        });
+
+        async function deleteJob(jobId) {
+            if (!confirm('Are you sure you want to delete this job?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/jobs/${jobId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    loadJobs();
+                    loadStats();
+                    alert('Job deleted successfully!');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting job:', error);
+                alert('Error deleting job. Please try again.');
+            }
+        }
+
+        function editJob(jobId) {
+            openModal(jobId);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('jobModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html> 
