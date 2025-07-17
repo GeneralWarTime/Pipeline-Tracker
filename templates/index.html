@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pipeline</title>
     <style>
+        :root {
+            /* Light theme variables */
+            --bg-primary: #f5f7fa;
+            --bg-secondary: white;
+            --bg-header: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-header: white;
+            --border-color: #e1e5e9;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --hover-bg: #f8f9fa;
+            --card-bg: white;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-header: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-header: white;
+            --border-color: #404040;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --hover-bg: #3a3a3a;
+            --card-bg: #2d2d2d;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,8 +41,9 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -24,12 +53,13 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--bg-header);
+            color: var(--text-header);
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -42,6 +72,24 @@
             opacity: 0.9;
         }
 
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -50,12 +98,12 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--card-bg);
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
             text-align: center;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, background-color 0.3s ease;
         }
 
         .stat-card:hover {
@@ -69,7 +117,7 @@
         }
 
         .stat-card p {
-            color: #666;
+            color: var(--text-secondary);
             font-weight: 500;
         }
 
@@ -106,26 +154,28 @@
 
         .filter-select {
             padding: 8px 15px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 0.9rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
 
         .jobs-table {
-            background: white;
+            background: var(--card-bg);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
 
         .table-header {
-            background: #f8f9fa;
+            background: var(--hover-bg);
             padding: 20px;
-            border-bottom: 1px solid #e1e5e9;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .table-header h2 {
-            color: #333;
+            color: var(--text-primary);
             font-size: 1.5rem;
         }
 
@@ -141,17 +191,17 @@
         th, td {
             padding: 15px 20px;
             text-align: left;
-            border-bottom: 1px solid #e1e5e9;
+            border-bottom: 1px solid var(--border-color);
         }
 
         th {
-            background: #f8f9fa;
+            background: var(--hover-bg);
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
         }
 
         tr:hover {
-            background: #f8f9fa;
+            background: var(--hover-bg);
         }
 
         .status-badge {
@@ -207,7 +257,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--card-bg);
             margin: 5% auto;
             padding: 30px;
             border-radius: 12px;
@@ -225,18 +275,18 @@
         }
 
         .modal-header h2 {
-            color: #333;
+            color: var(--text-primary);
         }
 
         .close {
-            color: #aaa;
+            color: var(--text-secondary);
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
         }
 
         .close:hover {
-            color: #000;
+            color: var(--text-primary);
         }
 
         .form-group {
@@ -247,7 +297,7 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
         }
 
         .form-group input,
@@ -255,10 +305,12 @@
         .form-group textarea {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e1e5e9;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 1rem;
             transition: border-color 0.3s ease;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
 
         .form-group input:focus,
@@ -334,6 +386,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
             <h1>📊 Pipeline</h1>
             <p>Track your recruitment pipeline, deal sizes, and commission earnings</p>
         </div>
@@ -365,14 +418,6 @@
                 <h3 id="jobCommission" class="commission">$0</h3>
                 <p>Projected Commission</p>
             </div>
-            <div class="stat-card">
-                <h3 id="yearlyCommission" class="commission">$0</h3>
-                <p>Yearly Commission (9%)</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="monthlyCommission" class="commission">$0</h3>
-                <p>Monthly Commission (÷12)</p>
-            </div>
         </div>
 
         <div class="controls">
@@ -401,13 +446,13 @@
                             <th>Start Date</th>
                             <th>Deal Size</th>
                             <th>Commission (9%)</th>
-                                                <th>Status</th>
-                    <th>Actions</th>
-                </tr>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody id="jobsTableBody">
                         <tr>
-                            <td colspan="9" style="text-align: center; padding: 40px; color: #666;">
+                            <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                                 No jobs found. Add your first job to get started!
                             </td>
                         </tr>
@@ -428,27 +473,28 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="jobTitle">Job Title *</label>
-                        <input type="text" id="jobTitle" required>
+                        <input type="text" id="jobTitle" name="jobTitle" required>
                     </div>
                     <div class="form-group">
-                        <label for="clientName">Client Name *</label>
-                        <select id="clientName" required onchange="updateSupplierMargin()">
-                            <option value="">Select a client</option>
+                        <label for="clientName">Client *</label>
+                        <select id="clientName" name="clientName" required onchange="updateSupplierMargin()">
+                            <option value="">Select Client</option>
                             <option value="Commonwealth Bank">Commonwealth Bank</option>
-                            <option value="Mercer">Mercer</option>
                             <option value="Westpac">Westpac</option>
+                            <option value="Mercer">Mercer</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="hiringManager">Hiring Manager *</label>
-                        <input type="text" id="hiringManager" required>
+                        <input type="text" id="hiringManager" name="hiringManager" required>
                     </div>
                     <div class="form-group">
                         <label for="startMonth">Starting Month *</label>
                         <select id="startMonth" name="startMonth" required>
-                            <option value="">Select a month</option>
+                            <option value="">Select Month</option>
                             <option value="January">January</option>
                             <option value="February">February</option>
                             <option value="March">March</option>
@@ -466,44 +512,40 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="dailyRate">Daily Rate ($) *</label>
-                        <input type="number" id="dailyRate" name="dailyRate" step="0.01" placeholder="Enter daily rate" onchange="calculateDealSize()" required>
+                        <label for="dailyRate">Daily Rate ($)</label>
+                        <input type="number" id="dailyRate" name="dailyRate" step="0.01" onchange="calculateDealSize()">
                     </div>
                     <div class="form-group">
-                        <label for="supplierMargin">Supplier Margin (%) *</label>
-                        <input type="number" id="supplierMargin" name="supplierMargin" step="0.01" placeholder="Enter margin %" onchange="calculateDealSize()" required>
+                        <label for="supplierMargin">Supplier Margin (%)</label>
+                        <input type="number" id="supplierMargin" name="supplierMargin" step="0.01" onchange="calculateDealSize()">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="dealSize">Deal Size ($) *</label>
-                        <input type="number" id="dealSize" name="dealSize" step="0.01" required readonly>
-                        <small style="color: #666; font-size: 0.8rem;">Auto-calculated: Daily Rate × 230 × Supplier Margin</small>
+                        <input type="number" id="dealSize" name="dealSize" step="0.01" required>
                     </div>
-                </div>
-                <div class="form-row">
                     <div class="form-group">
-                        <label for="commissionRate">Commission Rate (%)</label>
-                        <input type="number" id="commissionRate" step="0.01" value="9" min="0" max="100">
+                        <label for="commissionRate">Commission Rate (%) *</label>
+                        <input type="number" id="commissionRate" name="commissionRate" value="9.00" step="0.01" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status">
+                    <label for="status">Status *</label>
+                    <select id="status" name="status" required>
                         <option value="Active">Active</option>
                         <option value="Pending">Pending</option>
                         <option value="Closed">Closed</option>
                         <option value="Placed">Placed</option>
                     </select>
                 </div>
-
                 <div class="form-group" id="contractorNameGroup" style="display: none;">
-                    <label for="contractorName">Contractor Name *</label>
-                    <input type="text" id="contractorName" placeholder="Enter the contractor's name">
+                    <label for="contractorName">Contractor Name</label>
+                    <input type="text" id="contractorName" name="contractorName">
                 </div>
                 <div class="form-group">
                     <label for="notes">Notes</label>
-                    <textarea id="notes" rows="3" placeholder="Add any additional notes..."></textarea>
+                    <textarea id="notes" name="notes" rows="3"></textarea>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
@@ -517,8 +559,30 @@
         let jobs = [];
         let editingJobId = null;
 
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeToggle');
+            icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
         // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
             loadJobs();
             loadStats();
             setDefaultMonth();
@@ -589,8 +653,6 @@
             document.getElementById('pendingJobs').textContent = stats.pending_jobs;
             document.getElementById('jobDealSize').textContent = formatCurrency(stats.job_deal_size);
             document.getElementById('jobCommission').textContent = formatCurrency(stats.job_commission);
-            document.getElementById('yearlyCommission').textContent = formatCurrency(stats.yearly_commission);
-            document.getElementById('monthlyCommission').textContent = formatCurrency(stats.monthly_commission);
         }
 
         function formatCurrency(amount) {
@@ -620,7 +682,7 @@
             if (filteredJobs.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px; color: #666;">
+                        <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                             No jobs found matching the current filter.
                         </td>
                     </tr>
@@ -707,8 +769,6 @@
             document.getElementById('jobModal').style.display = 'none';
             editingJobId = null;
         }
-
-
 
         // Show/hide contractor name field based on status
         document.getElementById('status').addEventListener('change', function() {

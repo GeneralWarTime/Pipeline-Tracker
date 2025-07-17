@@ -29,6 +29,11 @@ class Job(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.Text)
 
+    def __init__(self, **kwargs):
+        super().__init__()
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def calculate_commission(self):
         """Calculate commission amount based on deal size and rate."""
         self.commission_amount = self.deal_size * self.commission_rate
@@ -57,13 +62,20 @@ class Contractor(db.Model):
     contractor_name = db.Column(db.String(200), nullable=False)  # Required field
     job_title = db.Column(db.String(200), nullable=False)
     client_name = db.Column(db.String(200), nullable=False)
-    hiring_manager = db.Column(db.String(200), nullable=False)
     start_date = db.Column(db.String(20), nullable=False)  # Store as month name
     deal_size = db.Column(db.Float, nullable=False)
     commission_rate = db.Column(db.Float, default=0.09)
     commission_amount = db.Column(db.Float, nullable=False)
     placed_date = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.Text)
+    # Optionally: daily_rate, supplier_margin
+    daily_rate = db.Column(db.Float)
+    supplier_margin = db.Column(db.Float)
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def calculate_commission(self):
         """Calculate commission amount based on deal size and rate."""
@@ -77,13 +89,14 @@ class Contractor(db.Model):
             'contractor_name': self.contractor_name,
             'job_title': self.job_title,
             'client_name': self.client_name,
-            'hiring_manager': self.hiring_manager,
             'start_date': self.start_date,  # Month name as string
             'deal_size': self.deal_size,
             'commission_rate': self.commission_rate,
             'commission_amount': self.commission_amount,
             'placed_date': self.placed_date.strftime('%Y-%m-%d %H:%M') if self.placed_date else None,
-            'notes': self.notes
+            'notes': self.notes,
+            'daily_rate': self.daily_rate,
+            'supplier_margin': self.supplier_margin
         }
 
 @app.route('/')
@@ -121,10 +134,10 @@ def create_job():
             start_date=data['start_date'],  # Store month name directly
             deal_size=float(data['deal_size']),
             commission_rate=float(data.get('commission_rate', 0.09)),
-            status=data.get('status', 'Active'),
-            close_reason=data.get('close_reason', ''),
             notes=data.get('notes', '')
         )
+        job.status = data.get('status', 'Active')
+        job.close_reason = data.get('close_reason', '')
         
         # Calculate commission
         job.calculate_commission()
@@ -179,11 +192,12 @@ def update_job(job_id):
                 contractor_name=contractor_name,
                 job_title=job.job_title,
                 client_name=job.client_name,
-                hiring_manager=job.hiring_manager,
                 start_date=job.start_date,
                 deal_size=job.deal_size,
                 commission_rate=job.commission_rate,
-                notes=job.notes
+                notes=job.notes,
+                daily_rate=getattr(job, 'daily_rate', None),
+                supplier_margin=getattr(job, 'supplier_margin', None)
             )
             contractor.calculate_commission()
             db.session.add(contractor)
@@ -229,11 +243,12 @@ def create_contractor():
             contractor_name=data['contractor_name'],
             job_title=data['job_title'],
             client_name=data['client_name'],
-            hiring_manager=data['hiring_manager'],
             start_date=data['start_date'],  # Store month name directly
             deal_size=float(data['deal_size']),
             commission_rate=float(data.get('commission_rate', 0.09)),
-            notes=data.get('notes', '')
+            notes=data.get('notes', ''),
+            daily_rate=data.get('daily_rate'),
+            supplier_margin=data.get('supplier_margin')
         )
         
         # Calculate commission
@@ -307,8 +322,8 @@ def get_contractor_stats():
         
         return jsonify({
             'total_contractors': total_contractors,
-            'contractor_deal_size': contractor_deal_size,
-            'contractor_commission': contractor_commission,
+            'total_deal_size': contractor_deal_size,
+            'total_commission': contractor_commission,
             'monthly_commission': monthly_commission
         })
         
@@ -317,14 +332,10 @@ def get_contractor_stats():
 
 @app.route('/api/money-lost')
 def get_money_lost():
-    """Get money lost statistics - Closed jobs with reasons only."""
+    """Get money lost statistics - All closed jobs."""
     try:
-        # Only include closed jobs that have a close reason
-        closed_jobs = Job.query.filter(
-            Job.status == 'Closed',
-            Job.close_reason.isnot(None),
-            Job.close_reason != ''
-        ).all()
+        # Include all closed jobs, regardless of close reason
+        closed_jobs = Job.query.filter(Job.status == 'Closed').all()
         
         total_closed_jobs = len(closed_jobs)
         lost_deal_size = sum(job.deal_size for job in closed_jobs)
@@ -333,7 +344,8 @@ def get_money_lost():
         return jsonify({
             'total_closed_jobs': total_closed_jobs,
             'lost_deal_size': lost_deal_size,
-            'lost_commission': lost_commission
+            'lost_commission': lost_commission,
+            'closed_jobs': [job.to_dict() for job in closed_jobs]
         })
         
     except Exception as e:

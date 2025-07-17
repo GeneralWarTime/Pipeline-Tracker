@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Money Lost - Pipeline</title>
     <style>
+        :root {
+            /* Light theme variables */
+            --bg-primary: #f5f7fa;
+            --bg-secondary: white;
+            --bg-header: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-header: white;
+            --border-color: #e1e5e9;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --hover-bg: #f8f9fa;
+            --card-bg: white;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme variables */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-header: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-header: white;
+            --border-color: #404040;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --hover-bg: #3a3a3a;
+            --card-bg: #2d2d2d;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,8 +41,9 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -24,12 +53,13 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
+            background: var(--bg-header);
+            color: var(--text-header);
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -40,6 +70,24 @@
         .header p {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .nav {
@@ -103,21 +151,21 @@
             font-weight: 500;
         }
 
-        .lost-jobs-table {
-            background: white;
+        .money-lost-table {
+            background: var(--card-bg);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow);
         }
 
         .table-header {
-            background: #f8f9fa;
+            background: var(--hover-bg);
             padding: 20px;
-            border-bottom: 1px solid #e1e5e9;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .table-header h2 {
-            color: #333;
+            color: var(--text-primary);
             font-size: 1.5rem;
         }
 
@@ -133,27 +181,27 @@
         th, td {
             padding: 15px 20px;
             text-align: left;
-            border-bottom: 1px solid #e1e5e9;
+            border-bottom: 1px solid var(--border-color);
         }
 
         th {
-            background: #f8f9fa;
+            background: var(--hover-bg);
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
         }
 
         tr:hover {
-            background: #f8f9fa;
+            background: var(--hover-bg);
         }
 
         .currency {
             font-weight: 600;
-            color: #dc3545;
+            color: #28a745;
         }
 
         .commission {
             font-weight: 600;
-            color: #dc3545;
+            color: #007bff;
         }
 
         @media (max-width: 768px) {
@@ -182,12 +230,17 @@
         }
 
         .action-btn {
-            padding: 8px 16px;
+            padding: 6px 12px;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.9rem;
-            border: none;
-            margin: 2px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .edit-btn {
+            background: #007bff;
+            color: white;
         }
 
         .add-btn {
@@ -212,43 +265,40 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.5);
         }
 
         .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 0;
-            border-radius: 8px;
+            background: var(--card-bg);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-header {
-            background: #f8f9fa;
-            padding: 20px;
-            border-bottom: 1px solid #dee2e6;
-            border-radius: 8px 8px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
 
-        .modal-header h3 {
-            margin: 0;
-            color: #333;
+        .modal-header h2 {
+            color: var(--text-primary);
         }
 
         .close {
-            color: #aaa;
+            color: var(--text-secondary);
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
         }
 
         .close:hover {
-            color: #000;
+            color: var(--text-primary);
         }
 
         .form-group {
@@ -257,55 +307,67 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
-        .form-group select {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
         .form-actions {
-            padding: 20px;
-            border-top: 1px solid #dee2e6;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             justify-content: flex-end;
+            margin-top: 30px;
         }
 
-        .form-actions button {
-            padding: 10px 20px;
+        .btn {
+            padding: 12px 25px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            transition: transform 0.2s ease;
         }
 
-        .form-actions button[type="button"] {
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
             background: #6c757d;
             color: white;
         }
 
-        .form-actions button[type="submit"] {
-            background: #007bff;
-            color: white;
-        }
-
-        .form-actions button:hover {
-            opacity: 0.9;
+        .btn:hover {
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">🌙</button>
             <h1>💸 Money Lost</h1>
-            <p>Track closed jobs and their lost revenue potential</p>
+            <p>BLAME THE RECRUITERS</p>
         </div>
 
         <div class="nav">
@@ -329,10 +391,10 @@
             </div>
         </div>
 
-        <div class="lost-jobs-table">
+        <div class="money-lost-table">
             <div class="table-header">
-                <h2>❌ Closed Jobs</h2>
-                <button class="add-btn" onclick="openCloseReasonModal()">Add Close Reason</button>
+                <h2>📋 Closed Jobs</h2>
+                <button class="add-btn" onclick="addCloseReason()">Add Close Reason</button>
             </div>
             <div class="table-container">
                 <table>
@@ -340,18 +402,15 @@
                         <tr>
                             <th>Job Title</th>
                             <th>Client</th>
-                            <th>Hiring Manager</th>
-                            <th>Start Date</th>
                             <th>Deal Size</th>
                             <th>Commission</th>
                             <th>Close Reason</th>
-                            <th>Closed Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="closedJobsTableBody">
+                    <tbody id="moneyLostTableBody">
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px; color: #666;">
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                                 No closed jobs found.
                             </td>
                         </tr>
@@ -361,72 +420,86 @@
         </div>
     </div>
 
-    <!-- Close Reason Modal -->
+    <!-- Add Close Reason Modal -->
     <div id="closeReasonModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Add Close Reason</h3>
-                <span class="close" onclick="closeCloseReasonModal()">&times;</span>
+                <h2>Add Close Reason</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <form id="closeReasonForm">
                 <div class="form-group">
-                    <label for="jobSelect">Select Job:</label>
-                    <select id="jobSelect" required>
-                        <option value="">Choose a closed job</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="closeReason">Close Reason:</label>
-                    <select id="closeReason" required>
-                        <option value="">Select a reason</option>
-                        <option value="Lost to Competition">Lost to Competition</option>
-                        <option value="Cancelled or Hold">Cancelled or Hold</option>
-                        <option value="Aryan's Fault">Aryan's Fault</option>
-                    </select>
+                    <label for="closeReason">Close Reason *</label>
+                    <textarea id="closeReason" name="closeReason" rows="4" placeholder="Enter the reason why this job was closed..." required></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" onclick="closeCloseReasonModal()">Cancel</button>
-                    <button type="submit">Save</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Reason</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        let closedJobs = [];
+        let editingJobId = null;
+
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeToggle');
+            icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+        }
+
         // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
             loadClosedJobs();
-            loadMoneyLostStats();
         });
 
         async function loadClosedJobs() {
             try {
-                const response = await fetch('/api/jobs');
-                const allJobs = await response.json();
-                const closedJobs = allJobs.filter(job => job.status === 'Closed');
-                renderClosedJobs(closedJobs);
+                const response = await fetch('/api/money-lost');
+                const data = await response.json();
+                closedJobs = data.closed_jobs || [];
+                // Update stats
+                document.getElementById('totalClosedJobs').textContent = data.total_closed_jobs || 0;
+                document.getElementById('lostDealSize').textContent = formatCurrency(data.lost_deal_size || 0);
+                document.getElementById('lostCommission').textContent = formatCurrency(data.lost_commission || 0);
+                renderClosedJobs();
             } catch (error) {
                 console.error('Error loading closed jobs:', error);
             }
         }
 
-        async function loadMoneyLostStats() {
-            try {
-                const response = await fetch('/api/money-lost');
-                const stats = await response.json();
-                updateMoneyLostStats(stats);
-            } catch (error) {
-                console.error('Error loading money lost stats:', error);
-            }
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(amount);
         }
 
-        function renderClosedJobs(closedJobs) {
-            const tbody = document.getElementById('closedJobsTableBody');
+        function renderClosedJobs() {
+            const tbody = document.getElementById('moneyLostTableBody');
             
             if (closedJobs.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px; color: #666;">
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                             No closed jobs found.
                         </td>
                     </tr>
@@ -438,46 +511,58 @@
                 <tr>
                     <td><strong>${job.job_title}</strong></td>
                     <td>${job.client_name}</td>
-                    <td>${job.hiring_manager}</td>
-                    <td>${formatDate(job.start_date)}</td>
                     <td class="currency">${formatCurrency(job.deal_size)}</td>
                     <td class="commission">${formatCurrency(job.commission_amount)}</td>
                     <td>${job.close_reason || '-'}</td>
-                    <td>${formatDate(job.created_at)}</td>
                     <td>
+                        <button class="action-btn edit-btn" onclick="addCloseReason(${job.id})">Add Reason</button>
                         <button class="action-btn delete-btn" onclick="deleteClosedJob(${job.id})">Delete</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function updateMoneyLostStats(stats) {
-            document.getElementById('totalClosedJobs').textContent = stats.total_closed_jobs;
-            document.getElementById('lostDealSize').textContent = formatCurrency(stats.lost_deal_size);
-            document.getElementById('lostCommission').textContent = formatCurrency(stats.lost_commission);
+        function addCloseReason(jobId) {
+            editingJobId = jobId;
+            const modal = document.getElementById('closeReasonModal');
+            modal.style.display = 'block';
         }
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            }).format(amount);
+        function closeModal() {
+            document.getElementById('closeReasonModal').style.display = 'none';
+            editingJobId = null;
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            // If it's already a month name, return it as is
-            if (typeof dateString === 'string' && dateString.length > 0) {
-                return dateString;
+        document.getElementById('closeReasonForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const closeReason = document.getElementById('closeReason').value;
+            
+            try {
+                const response = await fetch(`/api/jobs/${editingJobId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        close_reason: closeReason
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeModal();
+                    loadClosedJobs();
+                    alert('Close reason added successfully!');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error adding close reason:', error);
+                alert('Error adding close reason. Please try again.');
             }
-            // Fallback for any date objects
-            const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-        }
+        });
 
         async function deleteClosedJob(jobId) {
             if (!confirm('Are you sure you want to delete this closed job?')) {
@@ -493,10 +578,9 @@
                 
                 if (result.success) {
                     loadClosedJobs();
-                    loadMoneyLostStats();
                     alert('Closed job deleted successfully!');
                 } else {
-                    alert('Error deleting closed job: ' + result.error);
+                    alert('Error: ' + result.error);
                 }
             } catch (error) {
                 console.error('Error deleting closed job:', error);
@@ -504,83 +588,11 @@
             }
         }
 
-        function openCloseReasonModal() {
-            const modal = document.getElementById('closeReasonModal');
-            const jobSelect = document.getElementById('jobSelect');
-            
-            // Load closed jobs without close reasons
-            loadClosedJobsWithoutReasons().then(jobs => {
-                jobSelect.innerHTML = '<option value="">Choose a closed job</option>';
-                jobs.forEach(job => {
-                    const option = document.createElement('option');
-                    option.value = job.id;
-                    option.textContent = `${job.job_title} - ${job.client_name}`;
-                    jobSelect.appendChild(option);
-                });
-            });
-            
-            modal.style.display = 'block';
-        }
-
-        function closeCloseReasonModal() {
-            document.getElementById('closeReasonModal').style.display = 'none';
-            document.getElementById('closeReasonForm').reset();
-        }
-
-        async function loadClosedJobsWithoutReasons() {
-            try {
-                const response = await fetch('/api/jobs');
-                const allJobs = await response.json();
-                return allJobs.filter(job => job.status === 'Closed' && !job.close_reason);
-            } catch (error) {
-                console.error('Error loading closed jobs without reasons:', error);
-                return [];
-            }
-        }
-
-        // Handle form submission
-        document.getElementById('closeReasonForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const jobId = document.getElementById('jobSelect').value;
-            const closeReason = document.getElementById('closeReason').value;
-            
-            if (!jobId || !closeReason) {
-                alert('Please select both a job and a close reason.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/jobs/${jobId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        close_reason: closeReason
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    closeCloseReasonModal();
-                    loadClosedJobs();
-                    alert('Close reason added successfully!');
-                } else {
-                    alert('Error adding close reason: ' + result.error);
-                }
-            } catch (error) {
-                console.error('Error adding close reason:', error);
-                alert('Error adding close reason. Please try again.');
-            }
-        });
-
         // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('closeReasonModal');
             if (event.target === modal) {
-                closeCloseReasonModal();
+                closeModal();
             }
         }
     </script>
